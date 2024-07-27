@@ -10,36 +10,7 @@ from dbhandlers import *
 bot = telebot.TeleBot(TOKEN)
 
 Recipe = namedtuple('Recipe', ['title', 'category', 'ingredients', 'steps', 'cook_time'])
-User = namedtuple('User', ['username', 'password', 'email'], defaults=(None, None, None))
-
-def user_data():
-
-    status = None
-    user = None
-
-    def closure(new_user: namedtuple):
-
-        user = new_user
-        print(f"user: {user}")
-
-        return user
-
-    return closure
-
-def recipe_data():
-
-    user_recipe = None
-
-    def closure(recipe: namedtuple):
-
-        user_recipe = recipe
-        print(f"recipe: {user_recipe}")
-
-        return user_recipe
-
-    return closure
-
-
+User = namedtuple('User', ['username', 'password', 'email', 'telegram_id'], defaults=(None, None, None))
 
 
 # Обработчики
@@ -114,12 +85,13 @@ def log_handler(message):
 
         if user_handler.add_new():
             bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
+            return
 
         else:
             bot.send_message(message.chat.id, 'Попробуй еще раз ввести данные по образцу:\nlog логин пароль')
-    
-    bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
 
+    bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
+    bot.register_next_step_handler(message, add_recipe, new_user.username)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'add_recipe')
 def add_recipe_callback(callback):
@@ -132,10 +104,10 @@ def add_recipe_callback(callback):
         
     bot.send_message(callback.message.chat.id, text)
 
-    
+
 
 @bot.message_handler(func=lambda m: m.text.startswith('add'))
-def add_recipe(message):
+def add_recipe(message, username):
     '''
     Обработчик добавления нового рецепта
     '''
@@ -147,7 +119,14 @@ def add_recipe(message):
 
     print(f'Рецепт\nНазвание: {user_recipe.title}\nВид блюда: {user_recipe.category}\nИнгридиенты: {user_recipe.ingredients}\nШаги приготовления: {user_recipe.steps}\nВремя приготовления: {user_recipe.cook_time}')
 
+    print(f'username {username}')
 
+    recipe_handler = RecipeHandler(user_recipe, username)
+
+    recipe_handler.add_new()
+
+    bot.send_message(message.chat.id, 'Рецепт добавлен')
+    
 
 @bot.callback_query_handler(func=lambda call: call.data == 'view_recipes')
 def view_recipies_callback(callback):

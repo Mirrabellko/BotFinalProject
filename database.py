@@ -69,16 +69,16 @@ class Database:
         Database.__finish_connection(conn)
 
     @staticmethod
-    def register_user(username: str, password: str):
+    def register_user(username: str, password: str, email: str):
         '''
         Регистрация в базе
         '''
 
         conn, cursor = Database.__start_connection()
 
-        trans = username, Database.__hash_password(password)
+        trans = username, Database.__hash_password(password), email
     
-        cursor.execute("INSERT INTO User (username, password_hash) VALUES(?, ?);", trans)
+        cursor.execute("INSERT INTO User (username, password_hash, email) VALUES(?, ?, ?);", trans)
         Database.__finish_connection(conn)
 
         print(f"Логин {username} зарегистрирован!")
@@ -127,7 +127,7 @@ class Database:
         return result
 
     @staticmethod
-    def __get_user_id(username: str):
+    def get_user_id(username: str):
         '''
         Получить id пользователя
         '''
@@ -139,10 +139,10 @@ class Database:
 
         Database.__finish_connection(conn)
 
-        return result
+        return result[0]
 
     @staticmethod
-    def __get_recipe_id(username: str, title: str):
+    def get_recipe_id(username: str, title: str):
         '''
         Получить id рецепта
         '''
@@ -199,19 +199,19 @@ class Database:
         '''
         Добавить рецепт
         '''
+
         conn, cursor = Database.__start_connection()
 
-        try:
-            cursor.execute(
-                    f'''
-                    INSERT INTO Comment (title, category, ingredients, steps, cook_time, user_id) VALUES
-                    {recipe.title}, {recipe.category}, {recipe.ingredients}, {recipe.steps}, {recipe.cook_time}, {Database.__get_user_id(username)}
-                    ''')
-            print("Комментарий успешно добавлен")
-        except sqlite3.IntegrityError as error:
-            print("Данный комментарий уже был добавлен ранее")
-            
+        user_id = Database.get_user_id(username)
+
+        trans = recipe.title, recipe.category, recipe.ingredients, recipe.steps, recipe.cook_time, user_id
+
+        cursor.execute('INSERT INTO Recipe (title, category, ingredients, steps, cook_time, user_id) VALUES(?, ?, ?, ?, ?, ?);', trans)
+        
+        print("Рецепт успешно добавлен")
+
         Database.__finish_connection(conn)
+
 
     @staticmethod
     def delete_recipe(username: str, title: str):
@@ -220,7 +220,7 @@ class Database:
         '''
         conn, cursor = Database.__start_connection()
 
-        target = Database.__get_recipe_id(username, title)
+        target = Database.get_recipe_id(username, title)
 
         try:
             cursor.execute("DELETE FROM Recipe WHERE id=?", (target, ))
@@ -230,4 +230,3 @@ class Database:
             print("Рецепт не был добавлен")
 
         Database.__finish_connection(conn)
-
