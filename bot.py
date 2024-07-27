@@ -115,6 +115,20 @@ def log_handler(message):
         bot.send_message(message.chat.id, 'Попробуй еще раз ввести данные по образцу:\nlog логин пароль')
 
 
+@bot.callback_query_handler(func=lambda call: call.data == 'add_recipe')
+def add_recipe(message): pass
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'view_recipes')
+def view_recipe(message): pass
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'view_one')
+def view_one_recipe(message): pass
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'delete')
+def delete_recipe(message): pass
 
 
 
