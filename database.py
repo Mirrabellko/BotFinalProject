@@ -40,7 +40,7 @@ class Database:
         sha256 = hashlib.sha256()
         sha256.update(pswd.encode())
         pswd_hash = sha256.hexdigest()
-        
+
         return pswd_hash
 
     def init_db(self):
@@ -156,7 +156,7 @@ class Database:
 
         return result
     
-    def get_recipies(self, username: str):
+    def get_all_recipies(self, username: str):
         '''
         Получить рецепты пользователя
         '''
@@ -171,7 +171,28 @@ class Database:
         print('Рецепты выгружены')
 
         return result
+
+    def get_one_recipe(self, username: str, title: str):
+
+        '''
+        Проверить был ли добавлен ранее рецепт
+        '''
+
+        result = False
         
+        conn, cursor = self.__start_connection()
+
+        cursor.execute("SELECT * FROM Recipe WHERE username = ? AND title =?", (username, title))
+
+        user_result = cursor.fetchone()
+
+        self.__finish_connection(conn)
+
+        if user_result:
+            result = True
+
+        return result
+
     def add_recipe(self, username: str, recipe: namedtuple):
         '''
         Добавить рецепт

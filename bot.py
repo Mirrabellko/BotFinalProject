@@ -5,6 +5,7 @@ from collections import namedtuple
 from config import TOKEN
 import database as db
 import keyboards as kb
+from dbhandlers import *
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -97,17 +98,22 @@ def log_handler(message):
 
     print(f"login:{new_user.username}, password: {new_user.password}, email: {new_user.email}")
 
-    
+    user_handler = UserHandler(new_user)
 
-    '''
-    if db_registration(login, password):
-        markup = kb.question()
-        user_state = ClientState(QuestionState)
-        bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
+    markup = kb.create_markup({
+        'add_recipe': 'Добавить новый рецепт',
+        'view_recipes': 'Просмотреть все рецепты',
+        'view_one': 'Поиск рецепта по названию',
+        'delete': 'Удалить рецепт'
+        })
+
+    if user_handler.search():
+        if user_handler.add_new():
+            bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
+
     else:
         bot.send_message(message.chat.id, 'Попробуй еще раз ввести данные по образцу:\nlog логин пароль')
-        
-        '''
+
 
 
 
