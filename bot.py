@@ -85,6 +85,9 @@ def login_callback(callback):
 
 @bot.message_handler(func=lambda m: m.text.startswith('log'))
 def log_handler(message):
+    '''
+    Обработчик регистрации и входа в систему
+    '''
 
     print("INFO:: enter to log handler")
 
@@ -108,27 +111,61 @@ def log_handler(message):
         })
 
     if not user_handler.search():
+
         if user_handler.add_new():
             bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
 
-    else:
-        bot.send_message(message.chat.id, 'Попробуй еще раз ввести данные по образцу:\nlog логин пароль')
+        else:
+            bot.send_message(message.chat.id, 'Попробуй еще раз ввести данные по образцу:\nlog логин пароль')
+    
+    bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'add_recipe')
-def add_recipe(message): pass
+def add_recipe_callback(callback):
+    '''
+    Обработчик добавления нового рецепта
+    '''
+    print("INFO:: enter to add_recipe_callback")
+
+    text = 'Введите по образцу:\nadd::\nНазвание рецепта::\nВид блюда::\nИнгридиенты::\nШаги приготовления::\nВремя приготовления'
+        
+    bot.send_message(callback.message.chat.id, text)
+
+    
+
+@bot.message_handler(func=lambda m: m.text.startswith('add'))
+def add_recipe(message):
+    '''
+    Обработчик добавления нового рецепта
+    '''
+    print("INFO:: enter to add_recipe")
+
+    command = message.text.split('::')
+
+    user_recipe = Recipe(command[1], command[2], command[3], command[4], command[5])
+
+    print(f'Рецепт\nНазвание: {user_recipe.title}\nВид блюда: {user_recipe.category}\nИнгридиенты: {user_recipe.ingredients}\nШаги приготовления: {user_recipe.steps}\nВремя приготовления: {user_recipe.cook_time}')
+
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'view_recipes')
-def view_recipe(message): pass
-
+def view_recipies_callback(callback):
+    '''
+    Просмотр всех рецептов пользователя
+    '''
 
 @bot.callback_query_handler(func=lambda call: call.data == 'view_one')
-def view_one_recipe(message): pass
-
+def view_one_recipe_callback(callback):
+    '''
+    Просмотр одного рецепта пользователя
+    '''
 
 @bot.callback_query_handler(func=lambda call: call.data == 'delete')
-def delete_recipe(message): pass
+def delete_recipe_callback(callback):
+    '''
+    Удаление рецепта
+    '''
 
 
 
