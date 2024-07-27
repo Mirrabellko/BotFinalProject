@@ -9,7 +9,7 @@ import keyboards as kb
 bot = telebot.TeleBot(TOKEN)
 
 Recipe = namedtuple('Recipe', ['title', 'category', 'ingredients', 'steps', 'cook_time'])
-User = namedtuple('User', ['username', 'password', 'email'])
+User = namedtuple('User', ['username', 'password', 'email'], defaults=(None, None, None))
 
 def user_data():
 
@@ -51,6 +51,7 @@ def start_handler( message):
 
     print("INFO:: enter to start_handler")
     text = 'Добро пожаловать в Книгу Рецептов'
+
     markup = kb.create_markup({
         'register': 'Начать использование!',
         'login': 'Вход в систему'
@@ -81,16 +82,24 @@ def login_callback(callback):
     bot.send_message(callback.message.chat.id, 'Введите по образцу:\nlog логин пароль')
 
 
-@bot.message_handler(func=lambda m: m.text.startswith('log')) # -log login password
-def register(message):
+@bot.message_handler(func=lambda m: m.text.startswith('log'))
+def log_handler(message):
 
-    print("INFO:: register")
-    command = message.text.replace('log ', '')
+    print("INFO:: enter to log handler")
 
-# Продолжить отсюда
-    login, password = tuple(command.split(' '))
-    print(f"login:{login}, password: {password}")
+    command = message.text.replace('log ', '').split()
 
+    if len(command) == 3:
+        new_user = User(command[0], command[1], command[2])
+    
+    else:
+        new_user = User(command[0], command[1])
+
+    print(f"login:{new_user.username}, password: {new_user.password}, email: {new_user.email}")
+
+    
+
+    '''
     if db_registration(login, password):
         markup = kb.question()
         user_state = ClientState(QuestionState)
@@ -98,7 +107,7 @@ def register(message):
     else:
         bot.send_message(message.chat.id, 'Попробуй еще раз ввести данные по образцу:\nlog логин пароль')
         
-        
+        '''
 
 
 
