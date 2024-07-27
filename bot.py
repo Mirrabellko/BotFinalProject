@@ -4,6 +4,7 @@ from collections import namedtuple
 
 from config import TOKEN
 import database as db
+import keyboards as kb
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -35,6 +36,16 @@ def recipe_data():
 
 
 
+
+# Обработчики
+
+@bot.message_handler(commands=['start'])
+def start_handler( message):
+
+    print("INFO:: enter to start_handler")
+    text = 'Выбирай'
+    markup = kb.start_markup()
+    bot.send_message(message.chat.id, text, reply_markup=markup)
         
         
 
