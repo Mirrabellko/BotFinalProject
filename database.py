@@ -40,6 +40,7 @@ class Database:
         sha256 = hashlib.sha256()
         sha256.update(pswd.encode())
         pswd_hash = sha256.hexdigest()
+        
         return pswd_hash
 
     def init_db(self):
@@ -206,12 +207,3 @@ class Database:
 
         self.__finish_connection(conn)
 
-
-'''
-name = 'one2'
-password = 'two'
-data = Database()
-#data.add_question()
-#data.register_user(name, password)
-print(data.validate_user(name, password))
-'''

@@ -1,14 +1,15 @@
 
 from telebot.types import *
 
-def start_markup():
+def create_markup(buttons: dict):
 
     markup = InlineKeyboardMarkup()
 
-    button1 = InlineKeyboardButton(text='Регистрация', callback_data='register')
-    button2 = InlineKeyboardButton(text='Вход', callback_data='login')
+    for key, value in buttons:
+
+        new_button = InlineKeyboardButton(text=buttons[value], callback_data=buttons[key])
     
-    markup.add(button1, button2)
+        markup.add(new_button)
     
     return markup
 
