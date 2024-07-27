@@ -107,7 +107,7 @@ def log_handler(message):
         'delete': 'Удалить рецепт'
         })
 
-    if user_handler.search():
+    if not user_handler.search():
         if user_handler.add_new():
             bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
 

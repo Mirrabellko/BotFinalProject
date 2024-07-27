@@ -43,6 +43,7 @@ class UserHandler(IDBHandler):
         '''
         Проверка данных пользователя
         '''
+
         result = False
 
         if self.__db.validate_user(self.user.username, self.user.password):
@@ -69,12 +70,14 @@ class RecipeHandler(IDBHandler):
         '''
         Добавление нового рецепта
         '''
+
         self.__db.add_recipe(username=self.username, recipe=self.recipe)
 
     def search(self, one_title=None): 
         '''
         Выгрузка всех рецептов пользователя
         '''
+
         if one_title == None:
             user_recipies = self.__db.get_all_recipies(self.username)
 
@@ -87,4 +90,7 @@ class RecipeHandler(IDBHandler):
         '''
         Удаление рецепта
         '''
+
         self.__db.delete_recipe(username=self.username, title= delete_title)
+
+        return True
