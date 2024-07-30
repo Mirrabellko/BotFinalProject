@@ -62,15 +62,18 @@ def log_handler(message):
 
     print("INFO:: enter to log handler")
 
+    global new_user
+
     command = message.text.replace('log ', '').split()
 
     if len(command) == 3:
-        new_user = User(command[0], command[1], command[2])
+        new_user = User(command[0], command[1], command[2], message.from_user.id)
     
     else:
         new_user = User(command[0], command[1])
 
     print(f"login:{new_user.username}, password: {new_user.password}, email: {new_user.email}")
+
 
     user_handler = UserHandler(new_user)
 
@@ -90,8 +93,13 @@ def log_handler(message):
         else:
             bot.send_message(message.chat.id, 'Попробуй еще раз ввести данные по образцу:\nlog логин пароль')
 
-    bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
-    bot.register_next_step_handler(message, add_recipe, new_user.username)
+    if user_handler.check_password():
+        bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
+
+    else:
+        bot.send_message(message.chat.id, 'Ошибка в пароле!')
+
+    #bot.register_next_step_handler(message, add_recipe, new_user.username)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'add_recipe')
 def add_recipe_callback(callback):
@@ -107,7 +115,7 @@ def add_recipe_callback(callback):
 
 
 @bot.message_handler(func=lambda m: m.text.startswith('add'))
-def add_recipe(message, username):
+def add_recipe(message):
     '''
     Обработчик добавления нового рецепта
     '''
@@ -119,13 +127,15 @@ def add_recipe(message, username):
 
     print(f'Рецепт\nНазвание: {user_recipe.title}\nВид блюда: {user_recipe.category}\nИнгридиенты: {user_recipe.ingredients}\nШаги приготовления: {user_recipe.steps}\nВремя приготовления: {user_recipe.cook_time}')
 
-    print(f'username {username}')
+    username = new_user.username
 
     recipe_handler = RecipeHandler(user_recipe, username)
 
-    recipe_handler.add_new()
-
-    bot.send_message(message.chat.id, 'Рецепт добавлен')
+    if recipe_handler.add_new():
+        bot.send_message(message.chat.id, 'Рецепт добавлен')
+    
+    else:
+        bot.send_message(message.chat.id, 'Что-то пошло не так...Попробуй еще раз!')
     
 
 @bot.callback_query_handler(func=lambda call: call.data == 'view_recipes')
@@ -133,6 +143,9 @@ def view_recipies_callback(callback):
     '''
     Просмотр всех рецептов пользователя
     '''
+    username = new_user.username
+    # продолжить отсюда
+
 
 @bot.callback_query_handler(func=lambda call: call.data == 'view_one')
 def view_one_recipe_callback(callback):

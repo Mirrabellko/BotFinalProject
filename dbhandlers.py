@@ -35,7 +35,7 @@ class UserHandler(IDBHandler):
 
         if not self.__db.validate_user(self.user.username, self.user.password):
 
-                self.__db.register_user(self.user.username, self.user.password, self.user.email)
+                self.__db.register_user(self.user.username, self.user.password, self.user.email, self.user.telegram_id)
             
         return True
     
@@ -51,7 +51,19 @@ class UserHandler(IDBHandler):
             result = True
 
         return result
-        
+
+    def check_password(self):
+
+        '''
+        Проверка пароля пользователя
+        '''
+        result = False
+
+        if self.__db.check_password(self.user.username, self.user.password):
+
+            result = True
+
+        return result
 
 class RecipeHandler(IDBHandler):
     '''

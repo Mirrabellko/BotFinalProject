@@ -48,7 +48,8 @@ class Database:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username VARCHAR(250) NOT NULL UNIQUE,
                     password_hash VARCHAR(50) NOT NULL,
-                    email VARCHAR(50)
+                    email VARCHAR(50),
+                    telegram_id INTEGER
                     )
                     ''')
         
@@ -69,16 +70,16 @@ class Database:
         Database.__finish_connection(conn)
 
     @staticmethod
-    def register_user(username: str, password: str, email: str):
+    def register_user(username: str, password: str, email: str, telegram_id):
         '''
         Регистрация в базе
         '''
 
         conn, cursor = Database.__start_connection()
 
-        trans = username, Database.__hash_password(password), email
+        trans = username, Database.__hash_password(password), email, telegram_id
     
-        cursor.execute("INSERT INTO User (username, password_hash, email) VALUES(?, ?, ?);", trans)
+        cursor.execute("INSERT INTO User (username, password_hash, email, telegram_id) VALUES(?, ?, ?, ?);", trans)
         Database.__finish_connection(conn)
 
         print(f"Логин {username} зарегистрирован!")
@@ -117,7 +118,7 @@ class Database:
 
         cursor.execute("SELECT password_hash FROM User WHERE username = ?", (username, ))
 
-        user_result = cursor.fetchone()
+        user_result = cursor.fetchone()[0]
 
         Database.__finish_connection(conn)
 
@@ -199,6 +200,7 @@ class Database:
         '''
         Добавить рецепт
         '''
+        result = False
 
         conn, cursor = Database.__start_connection()
 
@@ -206,12 +208,16 @@ class Database:
 
         trans = recipe.title, recipe.category, recipe.ingredients, recipe.steps, recipe.cook_time, user_id
 
-        cursor.execute('INSERT INTO Recipe (title, category, ingredients, steps, cook_time, user_id) VALUES(?, ?, ?, ?, ?, ?);', trans)
-        
-        print("Рецепт успешно добавлен")
+        try:
+            cursor.execute('INSERT INTO Recipe (title, category, ingredients, steps, cook_time, user_id) VALUES(?, ?, ?, ?, ?, ?);', trans)
+            result = True
 
+        except sqlite3.Error as error:
+            print("Что-то пошло не так...")
+        
         Database.__finish_connection(conn)
 
+        return result
 
     @staticmethod
     def delete_recipe(username: str, title: str):
@@ -230,3 +236,15 @@ class Database:
             print("Рецепт не был добавлен")
 
         Database.__finish_connection(conn)
+
+    @staticmethod
+    def get_username_by_telegram_id(telegram_id: int):
+
+        conn, cursor = Database.__start_connection()
+
+        cursor.execute("SELECT username FROM User WHERE telegram_id = ?", (telegram_id, ))
+        result = cursor.fetchone()
+
+        Database.__finish_connection(conn)
+
+        return result
