@@ -12,9 +12,6 @@ bot = telebot.TeleBot(TOKEN)
 Recipe = namedtuple('Recipe', ['title', 'category', 'ingredients', 'steps', 'cook_time'])
 User = namedtuple('User', ['username', 'password', 'email', 'telegram_id'], defaults=(None, None, None))
 
-USER_AUTHORIZATED = False
-
-# Обработчики
 
 @bot.message_handler(commands=['start'])
 def start_handler( message):
@@ -152,7 +149,6 @@ def add_recipe(message):
         bot.send_message(message.chat.id, 'Что-то пошло не так...Попробуй еще раз!', reply_markup= markup)
 
     
-
 @bot.callback_query_handler(func=lambda call: call.data == 'view_recipes')
 def view_recipies_callback(callback):
     '''
@@ -220,10 +216,6 @@ def delete_recipe_final(message):
 
     else:
         bot.send_message(message.chat.id, 'Что-то пошло не так...')
-
-
-
-
 
 
 if __name__ == "__main__":

@@ -196,7 +196,6 @@ class Database:
         else:
             return None
 
-
     @staticmethod
     def add_recipe(username: str, recipe: namedtuple):
         '''
