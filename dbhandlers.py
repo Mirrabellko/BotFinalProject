@@ -93,15 +93,18 @@ class RecipeHandler(IDBHandler):
         '''
         Выгрузка всех рецептов пользователя
         '''
+        result = 'Не найдено...'
 
         if one_title == None:
             user_recipies = self.__db.get_all_recipies(self.username)
 
         else:
-            user_recipies = self.__db.get_one_recipe(self.username, one_title)
+            user_recipies = [self.__db.get_one_recipe(self.username, one_title)]
 
         print("user_recipies: ", user_recipies)
-        result = self.__make_good_view(user_recipies)
+
+        if user_recipies:
+            result = self.__make_good_view(user_recipies)
 
         return result
 
@@ -109,10 +112,12 @@ class RecipeHandler(IDBHandler):
         '''
         Удаление рецепта
         '''
+        result = False
 
-        self.__db.delete_recipe(self.username, delete_title)
+        if self.__db.delete_recipe(self.username, delete_title):
+            result = True
 
-        return True
+        return result
 
     def __make_good_view(self, recipies: tuple) -> str:
         '''
@@ -122,7 +127,7 @@ class RecipeHandler(IDBHandler):
         all_data = ''
         for i in range(0, len(recipies)):
 
-            all_data += f'Рецепт № {i+1}\nВид блюда: {recipies[i][1]}\nИнгридиенты: {recipies[i][2]}\nШаги приготовления: {recipies[i][3]}\nВремя приготовления: {recipies[i][4]}\n\n'
+            all_data += f'Рецепт № {i+1}\nНазвание: {recipies[i][1]}\nВид блюда: {recipies[i][2]}\nИнгридиенты: {recipies[i][3]}\nШаги приготовления: {recipies[i][4]}\nВремя приготовления: {recipies[i][5]}\n\n'
             all_data += '________________\n\n'
 
         return all_data

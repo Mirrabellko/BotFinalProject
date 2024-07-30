@@ -174,12 +174,55 @@ def view_one_recipe_callback(callback):
     '''
     Просмотр одного рецепта пользователя
     '''
+    bot.send_message(callback.message.chat.id, 'Введите название рецепта по образцу:\nfind Название рецепта')
+
+
+@bot.message_handler(func=lambda m: m.text.startswith('find'))
+def view_one_recipe_final(message):
+    '''
+    Просмотр одного рецепта пользователя
+    '''
+    title = message.text.replace('find ', '')
+
+    username = new_user.username
+
+    recipe_handler = RecipeHandler(username)
+
+    result = recipe_handler.search(title)
+
+    markup = kb.create_reply(kb.menu_reply)
+
+    bot.send_message(message.chat.id, result, reply_markup= markup)
+
 
 @bot.callback_query_handler(func=lambda call: call.data == 'delete')
 def delete_recipe_callback(callback):
     '''
     Удаление рецепта
     '''
+    bot.send_message(callback.message.chat.id, 'Введите команду для удаления рецепта по образцу:\ndel Название рецепта')
+
+
+@bot.message_handler(func=lambda m: m.text.startswith('del'))
+def delete_recipe_final(message):
+    '''
+    Удаление одного рецепта пользователя
+    '''
+    title = message.text.replace('del ', '')
+
+    username = new_user.username
+
+    recipe_handler = RecipeHandler(username)
+
+    if recipe_handler.delete(title):
+        markup = kb.create_reply(kb.menu_reply)
+        bot.send_message(message.chat.id, 'Рецепт был удален', reply_markup= markup)
+
+    else:
+        bot.send_message(message.chat.id, 'Что-то пошло не так...')
+
+
+
 
 
 

@@ -150,7 +150,7 @@ class Database:
         conn, cursor = Database.__start_connection()
 
         cursor.execute("SELECT id FROM Recipe WHERE user_id = ? AND title = ?", (Database.get_user_id(username), title))
-        result = cursor.fetchone()
+        result = cursor.fetchone()[0]
 
         Database.__finish_connection(conn)
 
@@ -169,9 +169,11 @@ class Database:
 
         Database.__finish_connection(conn)
 
-        print('Рецепты выгружены')
-
-        return result
+        if result:
+            return result
+        
+        else:
+            return None
 
     @staticmethod
     def get_one_recipe(username: str, title: str):
@@ -179,21 +181,21 @@ class Database:
         '''
         Проверить был ли добавлен ранее рецепт
         '''
-
-        result = False
         
         conn, cursor = Database.__start_connection()
 
-        cursor.execute("SELECT * FROM Recipe WHERE username = ? AND title =?", (Database.get_user_id(username), title))
+        cursor.execute("SELECT * FROM Recipe WHERE user_id = ? AND title =?", (Database.get_user_id(username), title))
 
         user_result = cursor.fetchone()
 
         Database.__finish_connection(conn)
 
         if user_result:
-            result = True
+            return user_result
+        
+        else:
+            return None
 
-        return result
 
     @staticmethod
     def add_recipe(username: str, recipe: namedtuple):
@@ -206,7 +208,7 @@ class Database:
 
         user_id = Database.get_user_id(username)
 
-        trans = recipe.title, recipe.category, recipe.ingredients, recipe.steps, recipe.cook_time, user_id
+        trans = recipe.title.replace('\n', ''), recipe.category, recipe.ingredients, recipe.steps, recipe.cook_time, user_id
 
         try:
             cursor.execute('INSERT INTO Recipe (title, category, ingredients, steps, cook_time, user_id) VALUES(?, ?, ?, ?, ?, ?);', trans)
@@ -224,18 +226,23 @@ class Database:
         '''
         Удаление рецепта
         '''
+        result = False
+
         conn, cursor = Database.__start_connection()
 
         target = Database.get_recipe_id(username, title)
 
         try:
             cursor.execute("DELETE FROM Recipe WHERE id=?", (target, ))
-            print("Рецепт успешно добавлен")
+            result = True
+            print("Рецепт успешно удален")
 
         except sqlite3.IntegrityError as error:
             print("Рецепт не был добавлен")
 
         Database.__finish_connection(conn)
+
+        return result
 
     @staticmethod
     def get_username_by_telegram_id(telegram_id: int):
