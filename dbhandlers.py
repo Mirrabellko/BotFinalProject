@@ -70,7 +70,7 @@ class RecipeHandler(IDBHandler):
     Регулятор работы БД с данными рецепта
     '''
 
-    def __init__(self, recipe: namedtuple, author: str) -> None:
+    def __init__(self, author: str, recipe = None) -> None:
         super().__init__()
 
         self.username = author
@@ -100,7 +100,10 @@ class RecipeHandler(IDBHandler):
         else:
             user_recipies = self.__db.get_one_recipe(self.username, one_title)
 
-        return user_recipies
+        print("user_recipies: ", user_recipies)
+        result = self.__make_good_view(user_recipies)
+
+        return result
 
     def delete(self, delete_title: str): 
         '''
@@ -110,3 +113,16 @@ class RecipeHandler(IDBHandler):
         self.__db.delete_recipe(self.username, delete_title)
 
         return True
+
+    def __make_good_view(self, recipies: tuple) -> str:
+        '''
+        Конвертер данных их кортежа в строку
+        title, category, ingredients, steps, cook_time
+        '''
+        all_data = ''
+        for i in range(0, len(recipies)):
+
+            all_data += f'Рецепт № {i+1}\nВид блюда: {recipies[i][1]}\nИнгридиенты: {recipies[i][2]}\nШаги приготовления: {recipies[i][3]}\nВремя приготовления: {recipies[i][4]}\n\n'
+            all_data += '________________\n\n'
+
+        return all_data

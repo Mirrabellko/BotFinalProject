@@ -164,8 +164,8 @@ class Database:
 
         conn, cursor = Database.__start_connection()
 
-        cursor.execute("SELECT * FROM Recipe WHERE username = ?", (username, ))
-        result = cursor.fetchone()
+        cursor.execute("SELECT * FROM Recipe WHERE user_id = ?", (Database.get_user_id(username), ))
+        result = cursor.fetchall()
 
         Database.__finish_connection(conn)
 
@@ -184,7 +184,7 @@ class Database:
         
         conn, cursor = Database.__start_connection()
 
-        cursor.execute("SELECT * FROM Recipe WHERE username = ? AND title =?", (username, title))
+        cursor.execute("SELECT * FROM Recipe WHERE username = ? AND title =?", (Database.get_user_id(username), title))
 
         user_result = cursor.fetchone()
 

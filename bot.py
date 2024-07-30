@@ -12,6 +12,7 @@ bot = telebot.TeleBot(TOKEN)
 Recipe = namedtuple('Recipe', ['title', 'category', 'ingredients', 'steps', 'cook_time'])
 User = namedtuple('User', ['username', 'password', 'email', 'telegram_id'], defaults=(None, None, None))
 
+USER_AUTHORIZATED = False
 
 # Обработчики
 
@@ -32,6 +33,19 @@ def start_handler( message):
     bot.send_message(message.chat.id, text, reply_markup=markup)
 
 
+@bot.message_handler(func=lambda message: message.text == 'Главное меню')
+def menu_callback_good(message):
+    '''
+    Обработчик колбека Главное меню
+    '''
+
+    print("INFO:: enter to register_callback")
+
+    markup = kb.create_markup(kb.menu_recipe)
+      
+    bot.send_message(message.chat.id, 'Выбирай!', reply_markup= markup)
+
+
 @bot.callback_query_handler(func=lambda call: call.data == 'register')
 def register_callback(callback):
     '''
@@ -40,7 +54,9 @@ def register_callback(callback):
 
     print("INFO:: enter to register_callback")
         
-    bot.send_message(callback.message.chat.id, 'Введите по образцу:\nlog логин пароль email')
+    markup = kb.create_reply(kb.menu_reply)
+
+    bot.send_message(callback.message.chat.id, 'Главное меню', reply_markup= markup)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'login')
@@ -77,17 +93,13 @@ def log_handler(message):
 
     user_handler = UserHandler(new_user)
 
-    markup = kb.create_markup({
-        'add_recipe': 'Добавить новый рецепт',
-        'view_recipes': 'Просмотреть все рецепты',
-        'view_one': 'Поиск рецепта по названию',
-        'delete': 'Удалить рецепт'
-        })
+    markup = kb.create_markup(kb.menu_recipe)
 
     if not user_handler.search():
 
         if user_handler.add_new():
             bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
+            USER_AUTHORIZATED = True
             return
 
         else:
@@ -95,6 +107,7 @@ def log_handler(message):
 
     if user_handler.check_password():
         bot.send_message(message.chat.id, 'Вход выполнен', reply_markup=markup)
+        USER_AUTHORIZATED = True
 
     else:
         bot.send_message(message.chat.id, 'Ошибка в пароле!')
@@ -113,7 +126,6 @@ def add_recipe_callback(callback):
     bot.send_message(callback.message.chat.id, text)
 
 
-
 @bot.message_handler(func=lambda m: m.text.startswith('add'))
 def add_recipe(message):
     '''
@@ -129,13 +141,16 @@ def add_recipe(message):
 
     username = new_user.username
 
-    recipe_handler = RecipeHandler(user_recipe, username)
+    recipe_handler = RecipeHandler(username, user_recipe)
+
+    markup = kb.create_reply(kb.menu_reply)
 
     if recipe_handler.add_new():
-        bot.send_message(message.chat.id, 'Рецепт добавлен')
+        bot.send_message(message.chat.id, 'Рецепт добавлен', reply_markup= markup)
     
     else:
-        bot.send_message(message.chat.id, 'Что-то пошло не так...Попробуй еще раз!')
+        bot.send_message(message.chat.id, 'Что-то пошло не так...Попробуй еще раз!', reply_markup= markup)
+
     
 
 @bot.callback_query_handler(func=lambda call: call.data == 'view_recipes')
@@ -144,7 +159,14 @@ def view_recipies_callback(callback):
     Просмотр всех рецептов пользователя
     '''
     username = new_user.username
-    # продолжить отсюда
+    
+    recipe_handler = RecipeHandler(username)
+
+    result = recipe_handler.search()
+
+    markup = kb.create_reply(kb.menu_reply)
+
+    bot.send_message(callback.message.chat.id, result, reply_markup= markup)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'view_one')
